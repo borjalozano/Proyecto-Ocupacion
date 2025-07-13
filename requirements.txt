@@ -1,6 +1,7 @@
 streamlit
-openai>=1.0.0
+pandas
+openpyxl
+openai
 fpdf
 PyMuPDF
 yagmail
-keyring
