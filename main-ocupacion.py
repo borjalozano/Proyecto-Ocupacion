@@ -100,7 +100,7 @@ if archivo:
             def color_pmz(valor):
                 return "🔴" if valor < 5 else "🟡" if valor < 15 else "🟢"
             detalle = ', '.join([f"{mes}: {row[mes]} {color_pmz(row[mes])}" for mes in meses_3 if mes in row])
-            st.markdown(f"**{persona}** — PMZ total: {pmz} {estado}  \n{detalle}")
+            st.markdown(f"**{persona}** — PMZ total: {pmz}  \n{detalle}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             st.markdown("---")
     with tab3:
