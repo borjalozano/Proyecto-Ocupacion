@@ -202,14 +202,18 @@ if archivo:
         st.metric("📊 Promedio PMZ por persona", round(promedio, 1))
 
         st.markdown(f"### 📊 Distribución PMZ por persona en {mes_indicador}")
-        import altair as alt
-        chart_data = pmz_total.sort_values(ascending=False).reset_index()
-        chart = alt.Chart(chart_data).mark_bar().encode(
-            y=alt.Y("Persona:N", sort="-x"),
-            x=alt.X("PMZ:Q"),
-            tooltip=["Persona", "PMZ"]
-        ).properties(height=500)
-        st.altair_chart(chart, use_container_width=True)
+        import plotly.express as px
+        chart_data = pmz_total.sort_values(ascending=True).reset_index()
+        fig = px.bar(
+            chart_data,
+            x="PMZ",
+            y="Persona",
+            orientation="h",
+            title=f"PMZ por persona en {mes_indicador}",
+            labels={"PMZ": "PMZ", "Persona": "Persona"},
+            height=1000
+        )
+        st.plotly_chart(fig, use_container_width=True)
 else:
     st.info("Por favor sube un archivo para comenzar.")
 
