@@ -182,10 +182,13 @@ if archivo:
                         st.session_state["personas_excluidas"].remove(persona)
                 st.rerun()
     with tab4:
-        st.markdown("## 📈 Indicadores de Ocupación")
+        st.markdown("## 📈 Indicadores de Ocupación por mes")
+
+        mes_indicador = st.selectbox("Selecciona el mes", meses_disponibles, index=meses_disponibles.index(mes_default))
+        datos_mes = personas_df[personas_df["Mes"] == mes_indicador]
 
         total_personas = personas_df["Persona"].nunique()
-        pmz_total = personas_df.groupby("Persona")["PMZ"].sum()
+        pmz_total = datos_mes.groupby("Persona")["PMZ"].sum()
 
         bajo = (pmz_total < 5).sum()
         medio = ((pmz_total >= 5) & (pmz_total < 15)).sum()
@@ -198,7 +201,7 @@ if archivo:
         st.metric("🟢 PMZ ≥ 15", alto)
         st.metric("📊 Promedio PMZ por persona", round(promedio, 1))
 
-        st.markdown("### 📊 Distribución PMZ por persona")
+        st.markdown(f"### 📊 Distribución PMZ por persona en {mes_indicador}")
         st.bar_chart(pmz_total.sort_values(ascending=False))
 else:
     st.info("Por favor sube un archivo para comenzar.")
