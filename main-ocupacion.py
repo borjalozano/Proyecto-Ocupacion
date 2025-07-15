@@ -99,6 +99,19 @@ if archivo:
             st.info("No se detectaron personas excluidas.")
         else:
             excluidos_resumen = excluidos_df[["Persona", "Proyecto", "Mes", "PMZ", "Razón exclusión"]].drop_duplicates()
-            st.dataframe(excluidos_resumen)
+            personas_reincorporadas = []
+
+            for persona in excluidos_resumen["Persona"].unique():
+                st.markdown(f"**{persona}**")
+                persona_df = excluidos_resumen[excluidos_resumen["Persona"] == persona]
+                st.dataframe(persona_df[["Proyecto", "Mes", "PMZ", "Razón exclusión"]])
+                if st.button(f"Incluir nuevamente a {persona}"):
+                    personas_reincorporadas.append(persona)
+
+            if personas_reincorporadas:
+                reincorporar_df = excluidos_df[excluidos_df["Persona"].isin(personas_reincorporadas)]
+                personas_df = pd.concat([personas_df, reincorporar_df.drop(columns=['Razón exclusión'])], ignore_index=True)
+                excluidos_df = excluidos_df[~excluidos_df["Persona"].isin(personas_reincorporadas)]
+                st.success(f"Se reincorporaron: {', '.join(personas_reincorporadas)}. Recarga la página para ver los cambios.")
 else:
     st.info("Por favor sube un archivo para comenzar.")
