@@ -217,6 +217,32 @@ if archivo:
         col_b.metric("📊 Ocupación PMZ promedio", round(promedio, 1))
         col_c.metric("🚫 Sin Ocupación PMZ", len(sin_ocupacion))
 
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("🔴 PMZ < 5", bajo)
+        col2.metric("🟡 PMZ 5–15", medio)
+        col3.metric("🟢 PMZ ≥ 15", alto)
+
+        import plotly.express as px
+        st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
+        chart_data = pmz_total.sort_values(ascending=True).reset_index()
+        chart_data["Persona_Num"] = [f"{i+1}. {p}" for i, p in enumerate(chart_data["Persona"])]
+        fig = px.bar(
+            chart_data,
+            x="PMZ",
+            y="Persona_Num",
+            orientation="h",
+            title=f"Ocupación PMZ por persona en {mes_indicador}",
+            labels={"PMZ": "Ocupación PMZ", "Persona_Num": "Persona"},
+            height=1000
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        if not sin_ocupacion.empty:
+            st.markdown("#### 🧾 Personas sin Ocupación PMZ")
+            st.dataframe(sin_ocupacion.reset_index())
+
+        # Generar resumen ejecutivo con IA (movido aquí)
         if st.button("🧠 Generar resumen ejecutivo con IA"):
             from openai import OpenAI
             import os
@@ -255,30 +281,6 @@ Escribe un resumen ejecutivo claro, con viñetas si lo consideres necesario, y s
                 st.markdown(resumen_ia)
             except Exception as e:
                 st.error(f"Error al generar resumen: {e}")
-
-        col1, col2, col3 = st.columns(3)
-        col1.metric("🔴 PMZ < 5", bajo)
-        col2.metric("🟡 PMZ 5–15", medio)
-        col3.metric("🟢 PMZ ≥ 15", alto)
-
-        import plotly.express as px
-        st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
-        chart_data = pmz_total.sort_values(ascending=True).reset_index()
-        chart_data["Persona_Num"] = [f"{i+1}. {p}" for i, p in enumerate(chart_data["Persona"])]
-        fig = px.bar(
-            chart_data,
-            x="PMZ",
-            y="Persona_Num",
-            orientation="h",
-            title=f"Ocupación PMZ por persona en {mes_indicador}",
-            labels={"PMZ": "Ocupación PMZ", "Persona_Num": "Persona"},
-            height=1000
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        if not sin_ocupacion.empty:
-            st.markdown("#### 🧾 Personas sin Ocupación PMZ")
-            st.dataframe(sin_ocupacion.reset_index())
 
     with tab5:
         st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
