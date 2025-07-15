@@ -242,10 +242,19 @@ if archivo:
             st.markdown("#### 🧾 Personas sin Ocupación PMZ")
             st.dataframe(sin_ocupacion.reset_index())
 
-    with tab6:
+    with tab5:
         st.markdown("## 💬 Chatbot de Ocupación PMZ")
 
         st.markdown("Este chatbot puede responder preguntas basadas en los datos cargados de ocupación y comentarios.")
+
+        with st.expander("💡 Ejemplos de preguntas", expanded=False):
+            st.markdown("""
+            - ¿Quiénes tienen menos de 5 PMZ en julio?
+            - ¿Qué personas presentan riesgo de subutilización?
+            - Resume los comentarios ingresados la última semana.
+            - ¿Hay alguien que no tiene asignaciones desde hace varios meses?
+            - ¿Qué acciones podría tomar con quienes tienen PMZ baja?
+            """)
 
         if 'chat_history' not in st.session_state:
             st.session_state.chat_history = []
@@ -304,7 +313,7 @@ if archivo:
             else:
                 st.chat_message("assistant").markdown(msg)
 
-    with tab5:
+    with tab6:
         st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
         st.markdown("""
         Bienvenido a esta última pestaña, también conocida como el **diario íntimo del piloto**. Aquí no encontrarás KPIs ni barras de colores... al menos no todavía.
