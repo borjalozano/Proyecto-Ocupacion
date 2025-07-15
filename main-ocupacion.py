@@ -274,11 +274,18 @@ Escribe un resumen ejecutivo claro, con viñetas si lo consideres necesario, y s
                     messages=[
                         {"role": "system", "content": "Eres un experto en análisis de ocupación que redacta informes ejecutivos claros."},
                         {"role": "user", "content": resumen_prompt}
-                    ]
+                    ],
+                    stream=True
                 )
-                resumen_ia = response.choices[0].message.content
+
+                resumen_ia = ""
                 st.markdown("### 📝 Resumen generado con IA")
-                st.markdown(resumen_ia)
+                placeholder = st.empty()
+                for chunk in response:
+                    if chunk.choices[0].delta.content:
+                        resumen_ia += chunk.choices[0].delta.content
+                        placeholder.markdown(resumen_ia + "▌")
+                placeholder.markdown(resumen_ia)
             except Exception as e:
                 st.error(f"Error al generar resumen: {e}")
 
