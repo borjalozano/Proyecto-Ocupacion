@@ -141,11 +141,14 @@ if archivo:
                 (historial["Persona"] == persona) &
                 (historial["Pestaña"] == "Dashboard global")
             ]
-            if not comentarios_previos.empty:
-                st.markdown("**💬 Comentarios previos:**")
-                for _, fila in comentarios_previos.iterrows():
-                    st.markdown(f"- `{fila['Fecha']}`: {fila['Comentario']}")
-            st.caption("✏️ Comentarios editables solo en la pestaña 1.")
+            ultimo = comentarios_previos.sort_values("Fecha", ascending=False).head(1)["Comentario"].values
+            comentario = ultimo[0] if len(ultimo) > 0 else ""
+            comentario = st.text_input(f"✏️ Comentario / acción para {persona}", value=comentario, key=f"coment_{persona}_tab2")
+            if comentario:
+                fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                guardar_comentario(fecha_actual, persona, ', '.join(meses_3), "Dashboard global", comentario)
+                guardar_comentario(fecha_actual, persona, mes_seleccionado, "Revisión semanal", comentario)
+                st.caption("💾 Guardado en ambas pestañas")
             st.markdown("---")
     with tab3:
         st.markdown("### 🚫 Personas excluidas del análisis")
