@@ -144,7 +144,11 @@ if archivo:
             ultimo = comentarios_previos.sort_values("Fecha", ascending=False).head(1)["Comentario"].values
             comentario = ultimo[0] if len(ultimo) > 0 else ""
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", value=comentario, key=f"coment_{persona}_tab2")
-            historial_previos = historial[historial["Persona"] == persona].sort_values("Fecha", ascending=False)
+            historial_previos = (
+                historial[historial["Persona"] == persona]
+                .sort_values("Fecha", ascending=False)
+                .drop_duplicates(subset=["Persona", "Comentario"])
+            )
             if not historial_previos.empty:
                 st.markdown("**💬 Comentarios anteriores:**")
                 for _, fila in historial_previos.iterrows():
