@@ -58,7 +58,9 @@ if archivo:
             persona = row["Persona"]
             pmz = row["PMZ"]
             proyectos = filtro_mes[filtro_mes["Persona"] == persona]["Proyecto"].unique()
-            st.markdown(f"**{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
+            # Determinar color
+            estado = "🔴" if pmz < 5 else "🟡" if pmz < 15 else "🟢"
+            st.markdown(f"{estado} **{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
             if st.button(f"❌ Excluir a {persona}", key=f"excluir_{persona}"):
                 st.session_state["personas_excluidas"].append(persona)
@@ -95,7 +97,9 @@ if archivo:
             persona = row["Persona"]
             pmz = row["PMZ"]
             estado = row["Estado"]
-            detalle = ', '.join([f"{mes}: {row[mes]}" for mes in meses_3 if mes in row])
+            def color_pmz(valor):
+                return "🔴" if valor < 5 else "🟡" if valor < 15 else "🟢"
+            detalle = ', '.join([f"{mes}: {row[mes]} {color_pmz(row[mes])}" for mes in meses_3 if mes in row])
             st.markdown(f"**{persona}** — PMZ total: {pmz} {estado}  \n{detalle}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             st.markdown("---")
