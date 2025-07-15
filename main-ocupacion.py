@@ -79,8 +79,8 @@ if archivo:
         "📊 Forecast a 3 meses",
         "🚫 Personas excluidas",
         "📈 Indicadores",
-        "💬 Chatbot de PMZ",
-        "ℹ️ Acerca del piloto"
+        "ℹ️ Acerca del piloto",
+        "💬 Chatbot de PMZ"
     ])
 
     with tab1:
