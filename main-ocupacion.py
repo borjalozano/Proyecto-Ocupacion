@@ -197,13 +197,15 @@ if archivo:
         alto = (pmz_total_validas >= 15).sum()
         promedio = pmz_total.mean()
 
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("👥 Personas totales", total_personas)
+        col_b.metric("📊 Ocupación PMZ promedio", round(promedio, 1))
+        col_c.metric("🚫 Sin Ocupación PMZ", len(sin_ocupacion))
+
         col1, col2, col3 = st.columns(3)
-        col1.metric("👥 Personas totales", total_personas)
-        col1.metric("📉 PMZ < 5", bajo)
-        col1.metric("⚠️ PMZ 5–15", medio)
-        col2.metric("🟢 PMZ ≥ 15", alto)
-        col2.metric("📊 PMZ promedio", round(promedio, 1))
-        col3.metric("🚫 Sin PMZ", len(sin_ocupacion))
+        col1.metric("🔴 PMZ < 5", bajo)
+        col2.metric("🟡 PMZ 5–15", medio)
+        col3.metric("🟢 PMZ ≥ 15", alto)
 
         import plotly.express as px
         st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
