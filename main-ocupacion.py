@@ -303,18 +303,11 @@ if archivo:
                 ][["Persona", "PMZ"]].sort_values("PMZ").values.tolist()
 
             prompt = f"""
-Actúa como un analista de ocupación que debe responder basándose **exclusivamente** en los datos entregados. 
-No inventes nombres ni situaciones. Si no tienes información suficiente, responde con 
-'No se puede responder con los datos disponibles'.
+Actúa como un analista de ocupación PMZ. Usa únicamente la lista de personas ya filtradas para responder. 
+No intentes calcular ni deducir nada fuera de esa lista.
 
-### Ocupación PMZ por persona y mes:
-{ocupacion_df.to_string(index=False)}
-
-### Comentarios históricos:
-{comentarios_df.to_string(index=False)}
-
-### Personas con menos de {umbral} jornadas de ocupación PMZ en {mes_detectado if mes_detectado else "mes no especificado"}:
-{chr(10).join([f"- {p[0]}: {p[1]} PMZ" for p in personas_en_riesgo]) if personas_en_riesgo else "No se encontraron personas con ese criterio."}
+### Personas detectadas con menos de {umbral} jornadas de ocupación PMZ en {mes_detectado if mes_detectado else "el mes especificado"}:
+{chr(10).join([f"- {p[0]}: {p[1]} jornadas" for p in personas_en_riesgo]) if personas_en_riesgo else "No se encontraron personas con ese criterio."}
 
 ### Pregunta del usuario:
 {user_input}
