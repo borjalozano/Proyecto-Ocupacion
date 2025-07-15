@@ -284,7 +284,8 @@ if archivo:
             openai.api_key = os.getenv("OPENAI_API_KEY")
 
             try:
-                response = openai.ChatCompletion.create(
+                client = openai.OpenAI()
+                response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {
@@ -298,7 +299,7 @@ if archivo:
                         {"role": "user", "content": prompt}
                     ]
                 )
-                answer = response["choices"][0]["message"]["content"]
+                answer = response.choices[0].message.content
                 st.session_state.chat_history.append(("user", user_input))
                 st.session_state.chat_history.append(("bot", answer))
             except Exception as e:
