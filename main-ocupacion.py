@@ -134,6 +134,10 @@ if archivo:
             st.markdown(f"**{persona}** — PMZ total: {pmz}  \n{detalle}")
             historial = st.session_state["comentarios"]
             comentarios_previos = historial[historial["Persona"] == persona]
+            if not comentarios_previos.empty:
+                st.markdown("**💬 Comentarios previos:**")
+                for _, fila in comentarios_previos.iterrows():
+                    st.markdown(f"- `{fila['Fecha']}`: {fila['Comentario']}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             if comentario:
                 fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
