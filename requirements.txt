@@ -5,3 +5,4 @@ openai
 fpdf
 PyMuPDF
 yagmail
+plotly
