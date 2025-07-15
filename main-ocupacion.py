@@ -192,8 +192,8 @@ if archivo:
         pmz_total = personas_completas.merge(pmz_total, on="Persona", how="left").fillna(0).set_index("Persona")["PMZ"]
 
         total_personas = personas_df["Persona"].nunique()
-        pmz_total = datos_mes.groupby("Persona")["PMZ"].sum()
-        sin_ocupacion = pmz_total[pmz_total.isna() | (pmz_total == 0)]
+        # pmz_total ya fue calculado correctamente arriba (con merge y fillna(0))
+        sin_ocupacion = pmz_total[pmz_total == 0]
 
         pmz_total_validas = pmz_total[pmz_total > 0]
         bajo = (pmz_total_validas < 5).sum()
