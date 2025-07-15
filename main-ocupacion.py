@@ -88,6 +88,9 @@ if archivo:
             historial = st.session_state["comentarios"]
             comentarios_previos = historial[historial["Persona"] == persona]
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
+            if comentario:
+                guardar_comentario(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), persona, mes_seleccionado, "Revisión semanal", comentario)
+                st.caption("💾 Guardado")
             if st.button(f"❌ Excluir a {persona}", key=f"excluir_{persona}"):
                 st.session_state["personas_excluidas"].append(persona)
                 st.rerun()
@@ -130,6 +133,9 @@ if archivo:
             historial = st.session_state["comentarios"]
             comentarios_previos = historial[historial["Persona"] == persona]
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
+            if comentario:
+                guardar_comentario(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), persona, ', '.join(meses_3), "Dashboard global", comentario)
+                st.caption("💾 Guardado")
             st.markdown("---")
     with tab3:
         st.markdown("### 🚫 Personas excluidas del análisis")
