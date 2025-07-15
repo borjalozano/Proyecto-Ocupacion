@@ -189,10 +189,12 @@ if archivo:
 
         total_personas = personas_df["Persona"].nunique()
         pmz_total = datos_mes.groupby("Persona")["PMZ"].sum()
+        sin_ocupacion = pmz_total[pmz_total.isna() | (pmz_total == 0)]
 
-        bajo = (pmz_total < 5).sum()
-        medio = ((pmz_total >= 5) & (pmz_total < 15)).sum()
-        alto = (pmz_total >= 15).sum()
+        pmz_total_validas = pmz_total[pmz_total > 0]
+        bajo = (pmz_total_validas < 5).sum()
+        medio = ((pmz_total_validas >= 5) & (pmz_total_validas < 15)).sum()
+        alto = (pmz_total_validas >= 15).sum()
         promedio = pmz_total.mean()
 
         st.metric("👥 Personas totales", total_personas)
@@ -200,6 +202,11 @@ if archivo:
         st.metric("⚠️ Ocupación PMZ entre 5 y 15", medio)
         st.metric("🟢 Ocupación PMZ ≥ 15", alto)
         st.metric("📊 Promedio Ocupación PMZ por persona", round(promedio, 1))
+        st.metric("🚫 Personas sin Ocupación PMZ", len(sin_ocupacion))
+
+        if not sin_ocupacion.empty:
+            st.markdown("#### 🧾 Personas sin Ocupación PMZ")
+            st.dataframe(sin_ocupacion.reset_index())
 
         st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
         import plotly.express as px
