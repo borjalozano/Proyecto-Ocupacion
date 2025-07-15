@@ -32,7 +32,7 @@ st.title("Gestor Semanal de Ocupación - Babel")
 st.sidebar.markdown("## 📥 Subir archivo de Power BI")
 archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
 st.sidebar.markdown("## 💬 Comentarios sesión anterior")
-archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv"])
+archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv", "xlsx"])
 st.sidebar.markdown("### 🟢 Ocupación PMZ ≥ 15")
 st.sidebar.markdown("### 🟡 5 ≤ Ocupación PMZ < 15")
 st.sidebar.markdown("### 🔴 Ocupación PMZ < 5")
@@ -42,7 +42,15 @@ if archivo:
     df = st.session_state["raw_df"]
     st.success("Archivo cargado correctamente.")
 
-    st.session_state["comentarios"] = cargar_comentarios_desde_archivo(archivo_comentarios)
+    if archivo_comentarios is not None:
+        if archivo_comentarios.name.endswith(".csv"):
+            df_comentarios = pd.read_csv(archivo_comentarios)
+        else:
+            df_comentarios = pd.read_excel(archivo_comentarios)
+        df_comentarios["Comentario"] = df_comentarios["Comentario"].fillna("")
+        st.session_state["comentarios"] = df_comentarios
+    else:
+        st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
 
     raw_df = df[df[0].astype(str).str.contains(r"\d{4} \|", regex=True, na=False)].copy()
     raw_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
