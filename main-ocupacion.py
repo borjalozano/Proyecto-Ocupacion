@@ -189,7 +189,12 @@ if archivo:
         # Garantizar que todas las personas activas estén incluidas
         personas_completas = pd.DataFrame({"Persona": personas_df["Persona"].unique()})
         pmz_total = datos_mes.groupby("Persona")["PMZ"].sum().reset_index()
-        pmz_total = personas_completas.merge(pmz_total, on="Persona", how="left").fillna(0).set_index("Persona")["PMZ"]
+        pmz_total = (
+            personas_completas.merge(pmz_total, on="Persona", how="left")
+            .fillna(0)
+            .infer_objects(copy=False)
+            .set_index("Persona")["PMZ"]
+        )
 
         total_personas = personas_df["Persona"].nunique()
         # pmz_total ya fue calculado correctamente arriba (con merge y fillna(0))
