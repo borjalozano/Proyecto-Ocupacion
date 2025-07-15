@@ -217,6 +217,45 @@ if archivo:
         col_b.metric("📊 Ocupación PMZ promedio", round(promedio, 1))
         col_c.metric("🚫 Sin Ocupación PMZ", len(sin_ocupacion))
 
+        if st.button("🧠 Generar resumen ejecutivo con IA"):
+            from openai import OpenAI
+            import os
+            import openai
+
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            client = openai.OpenAI()
+
+            comentarios_df = st.session_state.get("comentarios", pd.DataFrame())
+
+            resumen_prompt = f"""
+Eres un analista experto en ocupación PMZ. Resume la situación del mes **{mes_indicador}** usando los siguientes datos:
+
+- Personas sin PMZ: {len(sin_ocupacion)}
+- Personas en rojo (PMZ < 5): {bajo}
+- En amarillo (5–15): {medio}
+- En verde (≥ 15): {alto}
+- Promedio global: {round(promedio,1)} jornadas
+
+Si es útil, considera los siguientes comentarios recientes:
+{comentarios_df[comentarios_df["Mes"] == mes_indicador].sort_values("Fecha").to_string(index=False) if not comentarios_df.empty else "Sin comentarios."}
+
+Escribe un resumen ejecutivo claro, con viñetas si lo consideres necesario, y sugiere al menos una acción.
+"""
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto en análisis de ocupación que redacta informes ejecutivos claros."},
+                        {"role": "user", "content": resumen_prompt}
+                    ]
+                )
+                resumen_ia = response.choices[0].message.content
+                st.markdown("### 📝 Resumen generado con IA")
+                st.markdown(resumen_ia)
+            except Exception as e:
+                st.error(f"Error al generar resumen: {e}")
+
         col1, col2, col3 = st.columns(3)
         col1.metric("🔴 PMZ < 5", bajo)
         col2.metric("🟡 PMZ 5–15", medio)
@@ -256,7 +295,7 @@ if archivo:
         En otras palabras: lo que estás usando es el resultado de algo muy cercano al **"vibe programming"** — una mezcla de Streamlit, intuición, pruebas en caliente, y buen humor.
 
         ### 🧠 ¿Qué hace esta app?
-        - Muestra la Ocupación PMZ por persona y por mes
+        - Muestra la Ocupacion PMZ por persona y por mes
         - Clasifica automáticamente según semáforo
         - Permite ingresar y guardar comentarios
         - Los comentarios persisten entre semanas
