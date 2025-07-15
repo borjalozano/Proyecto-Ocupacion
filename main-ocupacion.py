@@ -33,9 +33,9 @@ st.sidebar.markdown("## 📥 Subir archivo de Power BI")
 archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
 st.sidebar.markdown("## 💬 Comentarios sesión anterior")
 archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv"])
-st.sidebar.markdown("### 🟢 PMZ ≥ 15")
-st.sidebar.markdown("### 🟡 5 ≤ PMZ < 15")
-st.sidebar.markdown("### 🔴 PMZ < 5")
+st.sidebar.markdown("### 🟢 Ocupación PMZ ≥ 15")
+st.sidebar.markdown("### 🟡 5 ≤ Ocupación PMZ < 15")
+st.sidebar.markdown("### 🔴 Ocupación PMZ < 5")
 if archivo:
     if "personas_df" not in st.session_state:
         st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=None)
@@ -84,14 +84,14 @@ if archivo:
         # Agrupar por persona y sumar PMZ
         resumen = filtro_mes.groupby("Persona").agg({"PMZ": "sum"}).reset_index()
         resumen = resumen.sort_values("PMZ", ascending=True)
-        st.markdown(f"### 👥 Personas con menor PMZ en **{mes_seleccionado}**")
+        st.markdown(f"### 👥 Personas con menor Ocupación PMZ en **{mes_seleccionado}**")
         for i, row in resumen.iterrows():
             persona = row["Persona"]
             pmz = row["PMZ"]
             proyectos = filtro_mes[filtro_mes["Persona"] == persona]["Proyecto"].unique()
             # Determinar color
             estado = "🔴" if pmz < 5 else "🟡" if pmz < 15 else "🟢"
-            st.markdown(f"{estado} **{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
+            st.markdown(f"{estado} **{persona}** — Ocupación PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
             historial = st.session_state["comentarios"]
             comentarios_previos = historial[historial["Persona"] == persona]
             comentario_reciente = comentarios_previos.sort_values("Fecha", ascending=False).head(1)["Comentario"].values
@@ -135,7 +135,7 @@ if archivo:
             def color_pmz(valor):
                 return "🔴" if valor < 5 else "🟡" if valor < 15 else "🟢"
             detalle = ', '.join([f"{mes}: {row[mes]} {color_pmz(row[mes])}" for mes in meses_3 if mes in row])
-            st.markdown(f"**{persona}** — PMZ total: {pmz}  \n{detalle}")
+            st.markdown(f"**{persona}** — Ocupación PMZ total: {pmz}  \n{detalle}")
             historial = st.session_state["comentarios"]
             comentarios_previos = historial[
                 (historial["Persona"] == persona) &
@@ -196,12 +196,12 @@ if archivo:
         promedio = pmz_total.mean()
 
         st.metric("👥 Personas totales", total_personas)
-        st.metric("📉 Personas con PMZ < 5", bajo)
-        st.metric("⚠️ PMZ entre 5 y 15", medio)
-        st.metric("🟢 PMZ ≥ 15", alto)
-        st.metric("📊 Promedio PMZ por persona", round(promedio, 1))
+        st.metric("📉 Personas con Ocupación PMZ < 5", bajo)
+        st.metric("⚠️ Ocupación PMZ entre 5 y 15", medio)
+        st.metric("🟢 Ocupación PMZ ≥ 15", alto)
+        st.metric("📊 Promedio Ocupación PMZ por persona", round(promedio, 1))
 
-        st.markdown(f"### 📊 Distribución PMZ por persona en {mes_indicador}")
+        st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
         import plotly.express as px
         chart_data = pmz_total.sort_values(ascending=True).reset_index()
         fig = px.bar(
@@ -209,8 +209,8 @@ if archivo:
             x="PMZ",
             y="Persona",
             orientation="h",
-            title=f"PMZ por persona en {mes_indicador}",
-            labels={"PMZ": "PMZ", "Persona": "Persona"},
+            title=f"Ocupación PMZ por persona en {mes_indicador}",
+            labels={"PMZ": "Ocupación PMZ", "Persona": "Persona"},
             height=1000
         )
         st.plotly_chart(fig, use_container_width=True)
