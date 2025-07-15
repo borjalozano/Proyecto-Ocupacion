@@ -249,12 +249,17 @@ if archivo:
 
         with st.expander("💡 Ejemplos de preguntas", expanded=False):
             st.markdown("""
-            - ¿Quiénes tienen menos de 5 PMZ en julio?
+            - ¿Quiénes tienen menos de 5 jornadas de ocupación PMZ en julio?
             - ¿Qué personas presentan riesgo de subutilización?
             - Resume los comentarios ingresados la última semana.
             - ¿Hay alguien que no tiene asignaciones desde hace varios meses?
-            - ¿Qué acciones podría tomar con quienes tienen PMZ baja?
+            - ¿Qué acciones podría tomar con quienes tienen ocupación PMZ baja?
             """)
+
+        # Botón para limpiar la conversación
+        if st.button("🧹 Limpiar conversación"):
+            st.session_state.chat_history = []
+            st.success("Conversación reiniciada.")
 
         if 'chat_history' not in st.session_state:
             st.session_state.chat_history = []
