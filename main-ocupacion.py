@@ -74,7 +74,7 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
-    tab1, tab2, tab3 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas", "📈 Indicadores"])
 
     with tab1:
         # Selector de mes
@@ -181,6 +181,25 @@ if archivo:
                     if persona in st.session_state["personas_excluidas"]:
                         st.session_state["personas_excluidas"].remove(persona)
                 st.rerun()
+    with tab4:
+        st.markdown("## 📈 Indicadores de Ocupación")
+
+        total_personas = personas_df["Persona"].nunique()
+        pmz_total = personas_df.groupby("Persona")["PMZ"].sum()
+
+        bajo = (pmz_total < 5).sum()
+        medio = ((pmz_total >= 5) & (pmz_total < 15)).sum()
+        alto = (pmz_total >= 15).sum()
+        promedio = pmz_total.mean()
+
+        st.metric("👥 Personas totales", total_personas)
+        st.metric("📉 Personas con PMZ < 5", bajo)
+        st.metric("⚠️ PMZ entre 5 y 15", medio)
+        st.metric("🟢 PMZ ≥ 15", alto)
+        st.metric("📊 Promedio PMZ por persona", round(promedio, 1))
+
+        st.markdown("### 📊 Distribución PMZ por persona")
+        st.bar_chart(pmz_total.sort_values(ascending=False))
 else:
     st.info("Por favor sube un archivo para comenzar.")
 
