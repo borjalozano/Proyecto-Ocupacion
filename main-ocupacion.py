@@ -35,6 +35,9 @@ if archivo:
     excluidos_df = personas_df[personas_df["Razón exclusión"] != ""].copy()
     personas_df = personas_df[personas_df["Razón exclusión"] == ""].drop(columns=["Razón exclusión"])
 
+    # Asegurar exclusión: solo trabajar con personas_df limpio
+    personas_df = personas_df[~personas_df["Persona"].isin(excluidos_df["Persona"])]
+
     # Obtener meses disponibles y preparar para ambos tabs
     meses_disponibles = sorted(personas_df["Mes"].dropna().unique().tolist())
     mes_actual = datetime.now().strftime("%b")  # Ej: "Jul"
@@ -110,8 +113,8 @@ if archivo:
 
             if personas_reincorporadas:
                 reincorporar_df = excluidos_df[excluidos_df["Persona"].isin(personas_reincorporadas)]
-                personas_df = pd.concat([personas_df, reincorporar_df.drop(columns=['Razón exclusión'])], ignore_index=True)
                 excluidos_df = excluidos_df[~excluidos_df["Persona"].isin(personas_reincorporadas)]
+                personas_df = pd.concat([personas_df, reincorporar_df.drop(columns=['Razón exclusión'])], ignore_index=True)
                 st.success(f"Se reincorporaron: {', '.join(personas_reincorporadas)}. Recarga la página para ver los cambios.")
 else:
     st.info("Por favor sube un archivo para comenzar.")
