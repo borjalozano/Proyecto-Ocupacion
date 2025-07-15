@@ -157,9 +157,18 @@ if archivo:
 else:
     st.info("Por favor sube un archivo para comenzar.")
 
-if st.sidebar.button("⬇️ Exportar comentarios de la sesión"):
-    historico = st.session_state.get("comentarios", pd.DataFrame())
-    from datetime import date
+import io
+from datetime import date
+
+historico = st.session_state.get("comentarios", pd.DataFrame())
+if not historico.empty:
+    buffer = io.StringIO()
+    historico.to_csv(buffer, index=False)
+    buffer.seek(0)
     filename = f"comentarios_{date.today()}.csv"
-    historico.to_csv(filename, index=False)
-    st.success(f"Archivo de comentarios exportado como {filename}")
+    st.sidebar.download_button(
+        label="⬇️ Descargar comentarios de la sesión",
+        data=buffer,
+        file_name=filename,
+        mime="text/csv"
+    )
