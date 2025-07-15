@@ -271,17 +271,20 @@ if archivo:
             comentarios_df = st.session_state.get("comentarios", pd.DataFrame())
             ocupacion_df = personas_df.groupby(["Persona", "Mes"])["PMZ"].sum().reset_index()
 
-            contexto = f"Datos de ocupación por persona y mes:\n{ocupacion_df.to_string(index=False)}\n\n"
-            contexto += f"Comentarios guardados:\n{comentarios_df.to_string(index=False)}\n\n"
+            prompt = f"""
+Actúa como un analista de ocupación que debe responder basándose **exclusivamente** en los datos entregados. 
+No inventes nombres ni situaciones. Si no tienes información suficiente, responde con 
+'No se puede responder con los datos disponibles'.
 
-            prompt = f"""Responde a la siguiente pregunta usando únicamente el contexto provisto.
+### Ocupación PMZ por persona y mes:
+{ocupacion_df.to_string(index=False)}
 
-            CONTEXTO:
-            {contexto}
+### Comentarios históricos:
+{comentarios_df.to_string(index=False)}
 
-            PREGUNTA:
-            {user_input}
-            """
+### Pregunta del usuario:
+{user_input}
+"""
 
             from openai import OpenAI
             import os
