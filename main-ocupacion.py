@@ -8,6 +8,10 @@ st.image("Logo Babel Horizontal (1).jpg", width=180)
 st.title("Gestor Semanal de Ocupación - Babel")
 
 st.sidebar.markdown("## 📥 Subir archivo de Power BI")
+st.sidebar.markdown("### 🟢 PMZ ≥ 15")
+st.sidebar.markdown("### 🟡 5 ≤ PMZ < 15")
+st.sidebar.markdown("### 🔴 PMZ < 5")
+
 archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
 
 if archivo:
@@ -45,7 +49,7 @@ if archivo:
 
     with tab2:
         # Leyenda de colores de semáforo
-        st.markdown("#### 🟢 PMZ ≥ 15 &nbsp;&nbsp;&nbsp; 🟡 5 ≤ PMZ < 15 &nbsp;&nbsp;&nbsp; 🔴 PMZ < 5")
+        # st.markdown("#### 🟢 PMZ ≥ 15 &nbsp;&nbsp;&nbsp; 🟡 5 ≤ PMZ < 15 &nbsp;&nbsp;&nbsp; 🔴 PMZ < 5")
         # Obtener los 3 próximos meses (mes actual + 2 siguientes)
         meses_ordenados = sorted(meses_disponibles, key=lambda x: datetime.strptime(x, "%b").month)
         if mes_actual in meses_ordenados:
