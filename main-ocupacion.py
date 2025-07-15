@@ -2,13 +2,36 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import re
+import os
+
+COMENTARIOS_FILE = "comentarios_sesion.csv"
+
+def cargar_comentarios_desde_archivo(uploaded_file):
+    if uploaded_file is not None:
+        return pd.read_csv(uploaded_file)
+    elif os.path.exists(COMENTARIOS_FILE):
+        return pd.read_csv(COMENTARIOS_FILE)
+    else:
+        return pd.DataFrame(columns=["Fecha", "Persona", "Mes", "Pestaña", "Comentario"])
+
+def guardar_comentario(fecha, persona, mes, pestana, comentario):
+    historico = st.session_state.get("comentarios", pd.DataFrame(columns=["Fecha", "Persona", "Mes", "Pestaña", "Comentario"]))
+    nuevo = pd.DataFrame([{
+        "Fecha": fecha,
+        "Persona": persona,
+        "Mes": mes,
+        "Pestaña": pestana,
+        "Comentario": comentario
+    }])
+    st.session_state["comentarios"] = pd.concat([historico, nuevo], ignore_index=True)
 
 st.set_page_config(page_title="Gestor Semanal de Ocupación - Babel", page_icon="📊")
 st.image("Logo Babel Horizontal (1).jpg", width=180)
 st.title("Gestor Semanal de Ocupación - Babel")
 
 st.sidebar.markdown("## 📥 Subir archivo de Power BI")
-
+archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv"])
+st.sidebar.markdown("## 💬 Comentarios sesión anterior")
 
 archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
 st.sidebar.markdown("### 🟢 PMZ ≥ 15")
@@ -19,6 +42,8 @@ if archivo:
         st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=None)
     df = st.session_state["raw_df"]
     st.success("Archivo cargado correctamente.")
+
+    st.session_state["comentarios"] = cargar_comentarios_desde_archivo(archivo_comentarios)
 
     raw_df = df[df[0].astype(str).str.contains(r"\d{4} \|", regex=True, na=False)].copy()
     raw_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
@@ -61,6 +86,8 @@ if archivo:
             # Determinar color
             estado = "🔴" if pmz < 5 else "🟡" if pmz < 15 else "🟢"
             st.markdown(f"{estado} **{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
+            historial = st.session_state["comentarios"]
+            comentarios_previos = historial[historial["Persona"] == persona]
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
             if st.button(f"❌ Excluir a {persona}", key=f"excluir_{persona}"):
                 st.session_state["personas_excluidas"].append(persona)
@@ -101,6 +128,8 @@ if archivo:
                 return "🔴" if valor < 5 else "🟡" if valor < 15 else "🟢"
             detalle = ', '.join([f"{mes}: {row[mes]} {color_pmz(row[mes])}" for mes in meses_3 if mes in row])
             st.markdown(f"**{persona}** — PMZ total: {pmz}  \n{detalle}")
+            historial = st.session_state["comentarios"]
+            comentarios_previos = historial[historial["Persona"] == persona]
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             st.markdown("---")
     with tab3:
@@ -127,3 +156,10 @@ if archivo:
                 st.rerun()
 else:
     st.info("Por favor sube un archivo para comenzar.")
+
+if st.sidebar.button("⬇️ Exportar comentarios de la sesión"):
+    historico = st.session_state.get("comentarios", pd.DataFrame())
+    from datetime import date
+    filename = f"comentarios_{date.today()}.csv"
+    historico.to_csv(filename, index=False)
+    st.success(f"Archivo de comentarios exportado como {filename}")
