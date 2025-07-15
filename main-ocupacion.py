@@ -15,28 +15,28 @@ st.sidebar.markdown("### 🟢 PMZ ≥ 15")
 st.sidebar.markdown("### 🟡 5 ≤ PMZ < 15")
 st.sidebar.markdown("### 🔴 PMZ < 5")
 if archivo:
-    df = pd.read_excel(archivo, sheet_name=0, header=None)
+    if "personas_df" not in st.session_state:
+        st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=None)
+    df = st.session_state["raw_df"]
     st.success("Archivo cargado correctamente.")
 
-    # Buscar filas que contengan IDs de personas (ej: 3531 | Nombre)
-    personas_df = df[df[0].astype(str).str.contains(r"\d{4} \|", regex=True, na=False)].copy()
-    personas_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
-    personas_df["Persona"] = personas_df["ID_Nombre"].str.extract(r"\| (.+)")
+    raw_df = df[df[0].astype(str).str.contains(r"\d{4} \|", regex=True, na=False)].copy()
+    raw_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
+    raw_df["Persona"] = raw_df["ID_Nombre"].str.extract(r"\| (.+)")
 
-    # Excluir personas con PMZ total = 0 y sin asignaciones válidas (ni enfermedad ni desocupación)
-    pmz_por_persona = personas_df.groupby("Persona")["PMZ"].sum()
-    sin_pmz = pmz_por_persona[pmz_por_persona == 0].index.tolist()
+    # Inicializar estado de exclusión manual
+    if "personas_excluidas" not in st.session_state:
+        # Aplicar lógica de exclusión automática inicial
+        pmz_total = raw_df.groupby("Persona")["PMZ"].sum()
+        sin_pmz = pmz_total[pmz_total == 0].index.tolist()
+        enfermedad = raw_df["Proyecto"].str.upper().str.contains("ENFERMEDAD", na=False)
+        desocupacion = raw_df["Proyecto"].str.upper().str.contains("DESOCUPACIÓN", na=False)
+        excluidas = raw_df[raw_df["Persona"].isin(sin_pmz) & ~enfermedad & ~desocupacion]["Persona"].unique().tolist()
+        st.session_state["personas_excluidas"] = excluidas
 
-    enfermedad = personas_df["Proyecto"].str.upper().str.contains("ENFERMEDAD", na=False)
-    desocupacion = personas_df["Proyecto"].str.upper().str.contains("DESOCUPACIÓN", na=False)
-
-    personas_df["Razón exclusión"] = ""
-    personas_df.loc[personas_df["Persona"].isin(sin_pmz) & ~enfermedad & ~desocupacion, "Razón exclusión"] = "PMZ = 0 y sin asignación válida"
-    excluidos_df = personas_df[personas_df["Razón exclusión"] != ""].copy()
-    personas_df = personas_df[personas_df["Razón exclusión"] == ""].drop(columns=["Razón exclusión"])
-
-    # Asegurar exclusión: solo trabajar con personas_df limpio
-    personas_df = personas_df[~personas_df["Persona"].isin(excluidos_df["Persona"])]
+    # Construir personas_df y excluidos_df en base al estado
+    personas_df = raw_df[~raw_df["Persona"].isin(st.session_state["personas_excluidas"])].copy()
+    excluidos_df = raw_df[raw_df["Persona"].isin(st.session_state["personas_excluidas"])].copy()
 
     # Obtener meses disponibles y preparar para ambos tabs
     meses_disponibles = sorted(personas_df["Mes"].dropna().unique().tolist())
@@ -60,6 +60,9 @@ if archivo:
             proyectos = filtro_mes[filtro_mes["Persona"] == persona]["Proyecto"].unique()
             st.markdown(f"**{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
+            if st.button(f"❌ Excluir a {persona}", key=f"excluir_{persona}"):
+                st.session_state["personas_excluidas"].append(persona)
+                st.rerun()
             st.markdown("---")
 
     with tab2:
@@ -101,20 +104,22 @@ if archivo:
         if excluidos_df.empty:
             st.info("No se detectaron personas excluidas.")
         else:
-            excluidos_resumen = excluidos_df[["Persona", "Proyecto", "Mes", "PMZ", "Razón exclusión"]].drop_duplicates()
+            excluidos_resumen = excluidos_df[["Persona", "Proyecto", "Mes", "PMZ"]].drop_duplicates()
             personas_reincorporadas = []
 
             for persona in excluidos_resumen["Persona"].unique():
                 st.markdown(f"**{persona}**")
                 persona_df = excluidos_resumen[excluidos_resumen["Persona"] == persona]
-                st.dataframe(persona_df[["Proyecto", "Mes", "PMZ", "Razón exclusión"]])
+                st.dataframe(persona_df[["Proyecto", "Mes", "PMZ"]])
                 if st.button(f"Incluir nuevamente a {persona}"):
                     personas_reincorporadas.append(persona)
 
             if personas_reincorporadas:
                 reincorporar_df = excluidos_df[excluidos_df["Persona"].isin(personas_reincorporadas)]
                 excluidos_df = excluidos_df[~excluidos_df["Persona"].isin(personas_reincorporadas)]
-                personas_df = pd.concat([personas_df, reincorporar_df.drop(columns=['Razón exclusión'])], ignore_index=True)
-                st.success(f"Se reincorporaron: {', '.join(personas_reincorporadas)}. Recarga la página para ver los cambios.")
+                for persona in personas_reincorporadas:
+                    if persona in st.session_state["personas_excluidas"]:
+                        st.session_state["personas_excluidas"].remove(persona)
+                st.rerun()
 else:
     st.info("Por favor sube un archivo para comenzar.")
