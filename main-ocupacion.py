@@ -23,12 +23,24 @@ if archivo:
     personas_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
     personas_df["Persona"] = personas_df["ID_Nombre"].str.extract(r"\| (.+)")
 
+    # Excluir personas con PMZ total = 0 y sin asignaciones válidas (ni enfermedad ni desocupación)
+    pmz_por_persona = personas_df.groupby("Persona")["PMZ"].sum()
+    sin_pmz = pmz_por_persona[pmz_por_persona == 0].index.tolist()
+
+    enfermedad = personas_df["Proyecto"].str.upper().str.contains("ENFERMEDAD", na=False)
+    desocupacion = personas_df["Proyecto"].str.upper().str.contains("DESOCUPACIÓN", na=False)
+
+    personas_df["Razón exclusión"] = ""
+    personas_df.loc[personas_df["Persona"].isin(sin_pmz) & ~enfermedad & ~desocupacion, "Razón exclusión"] = "PMZ = 0 y sin asignación válida"
+    excluidos_df = personas_df[personas_df["Razón exclusión"] != ""].copy()
+    personas_df = personas_df[personas_df["Razón exclusión"] == ""].drop(columns=["Razón exclusión"])
+
     # Obtener meses disponibles y preparar para ambos tabs
     meses_disponibles = sorted(personas_df["Mes"].dropna().unique().tolist())
     mes_actual = datetime.now().strftime("%b")  # Ej: "Jul"
     mes_default = mes_actual if mes_actual in meses_disponibles else meses_disponibles[0]
 
-    tab1, tab2 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global"])
+    tab1, tab2, tab3 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas"])
 
     with tab1:
         # Selector de mes
@@ -81,5 +93,12 @@ if archivo:
             st.markdown(f"**{persona}** — PMZ total: {pmz} {estado}  \n{detalle}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             st.markdown("---")
+    with tab3:
+        st.markdown("### 🚫 Personas excluidas del análisis")
+        if excluidos_df.empty:
+            st.info("No se detectaron personas excluidas.")
+        else:
+            excluidos_resumen = excluidos_df[["Persona", "Proyecto", "Mes", "PMZ", "Razón exclusión"]].drop_duplicates()
+            st.dataframe(excluidos_resumen)
 else:
     st.info("Por favor sube un archivo para comenzar.")
