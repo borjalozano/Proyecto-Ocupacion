@@ -1,3 +1,4 @@
+import streamlit as st
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas", "📈 Indicadores", "ℹ️ Acerca del piloto"])
 with tab5:
     st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
