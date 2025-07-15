@@ -67,6 +67,13 @@ if archivo:
     mes_actual = datetime.now().strftime("%b")  # Ej: "Jul"
     mes_default = mes_actual if mes_actual in meses_disponibles else meses_disponibles[0]
 
+    meses_ordenados = sorted(meses_disponibles, key=lambda x: datetime.strptime(x, "%b").month)
+    if mes_actual in meses_ordenados:
+        idx = meses_ordenados.index(mes_actual)
+    else:
+        idx = 0
+    meses_3 = meses_ordenados[idx:idx+3]
+
     tab1, tab2, tab3 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas"])
 
     with tab1:
@@ -101,13 +108,6 @@ if archivo:
     with tab2:
         # Leyenda de colores de semáforo
         # st.markdown("#### 🟢 PMZ ≥ 15 &nbsp;&nbsp;&nbsp; 🟡 5 ≤ PMZ < 15 &nbsp;&nbsp;&nbsp; 🔴 PMZ < 5")
-        # Obtener los 3 próximos meses (mes actual + 2 siguientes)
-        meses_ordenados = sorted(meses_disponibles, key=lambda x: datetime.strptime(x, "%b").month)
-        if mes_actual in meses_ordenados:
-            idx = meses_ordenados.index(mes_actual)
-        else:
-            idx = 0
-        meses_3 = meses_ordenados[idx:idx+3]
         st.markdown(f"#### Ocupación PMZ acumulada por persona para los próximos 3 meses: {', '.join(meses_3)}")
         filtro_3m = personas_df[personas_df["Mes"].isin(meses_3)]
         resumen_3m = filtro_3m.groupby("Persona").agg({"PMZ": "sum"}).reset_index()
