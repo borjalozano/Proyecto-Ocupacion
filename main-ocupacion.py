@@ -271,6 +271,37 @@ if archivo:
             comentarios_df = st.session_state.get("comentarios", pd.DataFrame())
             ocupacion_df = personas_df.groupby(["Persona", "Mes"])["PMZ"].sum().reset_index()
 
+            # --- Extraer mes y umbral desde el texto del usuario ---
+            import calendar
+            import re
+
+            # Mapear nombres de mes en español e inglés a abreviaturas tipo "Jul"
+            meses_map = {m.lower(): calendar.month_abbr[i] for i, m in enumerate(calendar.month_name) if m}
+            meses_map.update({calendar.month_abbr[i].lower(): calendar.month_abbr[i] for i in range(1,13)})
+            meses_map.update({
+                "enero": "Jan", "febrero": "Feb", "marzo": "Mar", "abril": "Apr",
+                "mayo": "May", "junio": "Jun", "julio": "Jul", "agosto": "Aug",
+                "septiembre": "Sep", "setiembre": "Sep", "octubre": "Oct",
+                "noviembre": "Nov", "diciembre": "Dec"
+            })
+
+            mes_detectado = None
+            for palabra in user_input.lower().split():
+                if palabra in meses_map:
+                    mes_detectado = meses_map[palabra]
+                    break
+
+            # Buscar umbral como número antes de "jornadas" o "PMZ"
+            match_umbral = re.search(r"(\d+)\s*(jornadas|pmz)", user_input.lower())
+            umbral = int(match_umbral.group(1)) if match_umbral else 5
+
+            # Filtrar personas con PMZ menor al umbral en el mes detectado
+            personas_en_riesgo = []
+            if mes_detectado:
+                personas_en_riesgo = ocupacion_df[
+                    (ocupacion_df["Mes"] == mes_detectado) & (ocupacion_df["PMZ"] < umbral)
+                ][["Persona", "PMZ"]].sort_values("PMZ").values.tolist()
+
             prompt = f"""
 Actúa como un analista de ocupación que debe responder basándose **exclusivamente** en los datos entregados. 
 No inventes nombres ni situaciones. Si no tienes información suficiente, responde con 
@@ -281,6 +312,9 @@ No inventes nombres ni situaciones. Si no tienes información suficiente, respon
 
 ### Comentarios históricos:
 {comentarios_df.to_string(index=False)}
+
+### Personas con menos de {umbral} jornadas de ocupación PMZ en {mes_detectado if mes_detectado else "mes no especificado"}:
+{chr(10).join([f"- {p[0]}: {p[1]} PMZ" for p in personas_en_riesgo]) if personas_en_riesgo else "No se encontraron personas con ese criterio."}
 
 ### Pregunta del usuario:
 {user_input}
