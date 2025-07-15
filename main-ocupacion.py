@@ -76,7 +76,7 @@ if archivo:
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📥 Revisión semanal",
-        "📊 Forecast a 3 meses",
+        "📊 Forecast a 3 meses ",
         "🚫 Personas excluidas",
         "📈 Indicadores",
         "ℹ️ Acerca del piloto"
