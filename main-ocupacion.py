@@ -162,11 +162,11 @@ from datetime import date
 historico = st.session_state.get("comentarios", pd.DataFrame())
 buffer = io.StringIO()
 historico.to_csv(buffer, index=False)
-buffer.seek(0)
+csv_data = buffer.getvalue()
 filename = f"comentarios_{date.today()}.csv"
 st.sidebar.download_button(
     label="⬇️ Descargar comentarios de la sesión",
-    data=buffer,
+    data=csv_data,
     file_name=filename,
     mime="text/csv"
 )
