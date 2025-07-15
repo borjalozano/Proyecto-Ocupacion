@@ -30,10 +30,9 @@ st.image("Logo Babel Horizontal (1).jpg", width=180)
 st.title("Gestor Semanal de Ocupación - Babel")
 
 st.sidebar.markdown("## 📥 Subir archivo de Power BI")
-archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv"])
-st.sidebar.markdown("## 💬 Comentarios sesión anterior")
-
 archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
+st.sidebar.markdown("## 💬 Comentarios sesión anterior")
+archivo_comentarios = st.sidebar.file_uploader("Cargar archivo de comentarios previos", type=["csv"])
 st.sidebar.markdown("### 🟢 PMZ ≥ 15")
 st.sidebar.markdown("### 🟡 5 ≤ PMZ < 15")
 st.sidebar.markdown("### 🔴 PMZ < 5")
