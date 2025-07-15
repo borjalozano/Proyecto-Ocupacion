@@ -305,11 +305,20 @@ No inventes nombres ni situaciones. Si no tienes información suficiente, respon
                             )
                         },
                         {"role": "user", "content": prompt}
-                    ]
+                    ],
+                    stream=True
                 )
-                answer = response.choices[0].message.content
+
                 st.session_state.chat_history.append(("user", user_input))
-                st.session_state.chat_history.append(("bot", answer))
+                respuesta_stream = ""
+                with st.chat_message("assistant"):
+                    message_placeholder = st.empty()
+                    for chunk in response:
+                        if chunk.choices[0].delta.content:
+                            respuesta_stream += chunk.choices[0].delta.content
+                            message_placeholder.markdown(respuesta_stream + "▌")
+                    message_placeholder.markdown(respuesta_stream)
+                st.session_state.chat_history.append(("bot", respuesta_stream))
             except Exception as e:
                 answer = f"Error al generar respuesta: {e}"
                 st.session_state.chat_history.append(("user", user_input))
@@ -319,8 +328,7 @@ No inventes nombres ni situaciones. Si no tienes información suficiente, respon
             role, msg = st.session_state.chat_history[i]
             if role == "user":
                 st.chat_message("user").markdown(msg)
-            else:
-                st.chat_message("assistant").markdown(msg)
+            # No mostrar el mensaje assistant aquí si fue mostrado en streaming
 
     with tab6:
         st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
