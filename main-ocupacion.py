@@ -136,7 +136,10 @@ if archivo:
             detalle = ', '.join([f"{mes}: {row[mes]} {color_pmz(row[mes])}" for mes in meses_3 if mes in row])
             st.markdown(f"**{persona}** — PMZ total: {pmz}  \n{detalle}")
             historial = st.session_state["comentarios"]
-            comentarios_previos = historial[historial["Persona"] == persona]
+            comentarios_previos = historial[
+                (historial["Persona"] == persona) &
+                (historial["Pestaña"] == "Dashboard global")
+            ]
             if not comentarios_previos.empty:
                 st.markdown("**💬 Comentarios previos:**")
                 for _, fila in comentarios_previos.iterrows():
