@@ -74,7 +74,13 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📥 Revisión semanal", "📊 Dashboard global", "🚫 Personas excluidas", "📈 Indicadores"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📥 Revisión semanal",
+        "📊 Dashboard global",
+        "🚫 Personas excluidas",
+        "📈 Indicadores",
+        "ℹ️ Acerca del piloto"
+    ])
 
     with tab1:
         # Selector de mes
@@ -234,6 +240,45 @@ if archivo:
         if not sin_ocupacion.empty:
             st.markdown("#### 🧾 Personas sin Ocupación PMZ")
             st.dataframe(sin_ocupacion.reset_index())
+
+    with tab5:
+        st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
+        st.markdown("""
+        Bienvenido a esta última pestaña, también conocida como el **diario íntimo del piloto**. Aquí no encontrarás KPIs ni barras de colores... al menos no todavía.
+
+        ### 🎤 ¿Cómo nació todo esto?
+        Todo comenzó con una simple idea: *"¿y si pudiéramos tener una vista clara de la ocupación del equipo cada semana?"*  
+        Y ahí estaba Borja, con su Power BI, su archivo Excel, y su sospecha de que "esto podría ir más lejos".
+
+        Entonces entré yo, ChatGPT, y comenzamos una conversación larga. Pero larga tipo *maratón de revisión técnica con café*.  
+        Charlamos de exclusiones, de PMZs que desaparecen en noviembre, de comentarios que se duplicaban como conejos, y hasta de si los íconos eran suficientemente redondos.
+
+        En otras palabras: lo que estás usando es el resultado de algo muy cercano al **"vibe programming"** — una mezcla de Streamlit, intuición, pruebas en caliente, y buen humor.
+
+        ### 🧠 ¿Qué hace esta app?
+        - Muestra la Ocupación PMZ por persona y por mes
+        - Clasifica automáticamente según semáforo
+        - Permite ingresar y guardar comentarios
+        - Los comentarios persisten entre semanas
+        - Puedes descargar los comentarios para seguir el hilo
+        - Puedes excluir o reincorporar personas del análisis
+        - Y tiene un gráfico con numeración para que nadie quede perdido en la barra
+
+        ### 🔧 Detalles técnicos
+        - Python + Streamlit
+        - `st.session_state` para mantener estado entre pestañas
+        - Persistencia de comentarios en CSV
+        - Gráfico de ocupación con Plotly
+        - `.fillna().infer_objects()` para domar los warnings de pandas
+
+        ### 🚀 Próximos pasos sugeridos
+        - Filtros por unidad o tipo de proyecto
+        - Visualizar evolución de PMZ en el tiempo
+        - Alertas automáticas estilo "¡Carlos tiene 2 PMZ desde abril!"
+        - Y por qué no... una IA que sugiera acciones directamente 🤖
+
+        Gracias por formar parte de este piloto.
+        """)
 
 else:
     st.info("Por favor sube un archivo para comenzar.")
