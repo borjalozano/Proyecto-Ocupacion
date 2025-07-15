@@ -74,11 +74,12 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📥 Revisión semanal",
-        "📊 Forecast a 3 meses ",
+        "📊 Forecast a 3 meses",
         "🚫 Personas excluidas",
         "📈 Indicadores",
+        "💬 Chatbot de PMZ",
         "ℹ️ Acerca del piloto"
     ])
 
@@ -240,6 +241,61 @@ if archivo:
         if not sin_ocupacion.empty:
             st.markdown("#### 🧾 Personas sin Ocupación PMZ")
             st.dataframe(sin_ocupacion.reset_index())
+
+    with tab6:
+        st.markdown("## 💬 Chatbot de Ocupación PMZ")
+
+        st.markdown("Este chatbot puede responder preguntas basadas en los datos cargados de ocupación y comentarios.")
+
+        if 'chat_history' not in st.session_state:
+            st.session_state.chat_history = []
+
+        user_input = st.chat_input("Haz una pregunta sobre las personas, su ocupación o los comentarios")
+
+        if user_input:
+            # Preparar contexto: comentarios + ocupación agrupada
+            comentarios_df = st.session_state.get("comentarios", pd.DataFrame())
+            ocupacion_df = personas_df.groupby(["Persona", "Mes"])["PMZ"].sum().reset_index()
+
+            contexto = f"Datos de ocupación por persona y mes:\n{ocupacion_df.to_string(index=False)}\n\n"
+            contexto += f"Comentarios guardados:\n{comentarios_df.to_string(index=False)}\n\n"
+
+            prompt = f"""Responde a la siguiente pregunta usando únicamente el contexto provisto.
+
+            CONTEXTO:
+            {contexto}
+
+            PREGUNTA:
+            {user_input}
+            """
+
+            from openai import OpenAI
+            import os
+            import openai
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "Eres un asistente útil que responde con base en datos de ocupación PMZ y comentarios."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+                answer = response["choices"][0]["message"]["content"]
+                st.session_state.chat_history.append(("user", user_input))
+                st.session_state.chat_history.append(("bot", answer))
+            except Exception as e:
+                answer = f"Error al generar respuesta: {e}"
+                st.session_state.chat_history.append(("user", user_input))
+                st.session_state.chat_history.append(("bot", answer))
+
+        for i in range(len(st.session_state.chat_history)-1, -1, -1):
+            role, msg = st.session_state.chat_history[i]
+            if role == "user":
+                st.chat_message("user").markdown(msg)
+            else:
+                st.chat_message("assistant").markdown(msg)
 
     with tab5:
         st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
