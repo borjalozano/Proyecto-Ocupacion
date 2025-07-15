@@ -74,12 +74,11 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📥 Revisión semanal",
         "📊 Forecast a 3 meses",
         "🚫 Personas excluidas",
         "📈 Indicadores",
-        "💬 Chatbot de PMZ",
         "ℹ️ Acerca del piloto"
     ])
 
@@ -243,121 +242,6 @@ if archivo:
             st.dataframe(sin_ocupacion.reset_index())
 
     with tab5:
-        st.markdown("## 💬 Chatbot de Ocupación PMZ")
-
-        st.markdown("Este chatbot puede responder preguntas basadas en los datos cargados de ocupación y comentarios.")
-
-        with st.expander("💡 Ejemplos de preguntas", expanded=False):
-            st.markdown("""
-            - ¿Quiénes tienen menos de 5 jornadas de ocupación PMZ en julio?
-            - ¿Qué personas presentan riesgo de subutilización?
-            - Resume los comentarios ingresados la última semana.
-            - ¿Hay alguien que no tiene asignaciones desde hace varios meses?
-            - ¿Qué acciones podría tomar con quienes tienen ocupación PMZ baja?
-            """)
-
-        # Botón para limpiar la conversación
-        if st.button("🧹 Limpiar conversación"):
-            st.session_state.chat_history = []
-            st.success("Conversación reiniciada.")
-
-        if 'chat_history' not in st.session_state:
-            st.session_state.chat_history = []
-
-        user_input = st.chat_input("Haz una pregunta sobre las personas, su ocupación o los comentarios")
-
-        if user_input:
-            # Preparar contexto: comentarios + ocupación agrupada
-            comentarios_df = st.session_state.get("comentarios", pd.DataFrame())
-            ocupacion_df = personas_df.groupby(["Persona", "Mes"])["PMZ"].sum().reset_index()
-
-            # --- Extraer mes y umbral desde el texto del usuario ---
-            import calendar
-            import re
-
-            # Mapear nombres de mes en español e inglés a abreviaturas tipo "Jul"
-            meses_map = {m.lower(): calendar.month_abbr[i] for i, m in enumerate(calendar.month_name) if m}
-            meses_map.update({calendar.month_abbr[i].lower(): calendar.month_abbr[i] for i in range(1,13)})
-            meses_map.update({
-                "enero": "Jan", "febrero": "Feb", "marzo": "Mar", "abril": "Apr",
-                "mayo": "May", "junio": "Jun", "julio": "Jul", "agosto": "Aug",
-                "septiembre": "Sep", "setiembre": "Sep", "octubre": "Oct",
-                "noviembre": "Nov", "diciembre": "Dec"
-            })
-
-            mes_detectado = None
-            for palabra in user_input.lower().split():
-                if palabra in meses_map:
-                    mes_detectado = meses_map[palabra]
-                    break
-
-            # Buscar umbral como número antes de "jornadas" o "PMZ"
-            match_umbral = re.search(r"(\d+)\s*(jornadas|pmz)", user_input.lower())
-            umbral = int(match_umbral.group(1)) if match_umbral else 5
-
-            # Filtrar personas con PMZ menor al umbral en el mes detectado
-            personas_en_riesgo = []
-            if mes_detectado:
-                personas_en_riesgo = ocupacion_df[
-                    (ocupacion_df["Mes"] == mes_detectado) & (ocupacion_df["PMZ"] < umbral)
-                ][["Persona", "PMZ"]].sort_values("PMZ").values.tolist()
-
-            prompt = f"""
-Actúa como un analista de ocupación PMZ. Usa únicamente la lista de personas ya filtradas para responder. 
-No intentes calcular ni deducir nada fuera de esa lista.
-
-### Personas detectadas con menos de {umbral} jornadas de ocupación PMZ en {mes_detectado if mes_detectado else "el mes especificado"}:
-{chr(10).join([f"- {p[0]}: {p[1]} jornadas" for p in personas_en_riesgo]) if personas_en_riesgo else "No se encontraron personas con ese criterio."}
-
-### Pregunta del usuario:
-{user_input}
-"""
-
-            from openai import OpenAI
-            import os
-            import openai
-            openai.api_key = os.getenv("OPENAI_API_KEY")
-
-            try:
-                client = openai.OpenAI()
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": (
-                                "Eres un asistente experto en gestión de personas basado en datos de ocupación PMZ y comentarios históricos. "
-                                "Tu tarea es identificar riesgos de subutilización, destacar personas con PMZ baja (<5), proponer acciones concretas para cada caso y redactar resúmenes semanales claros. "
-                                "Puedes usar emojis y listas para organizar tus respuestas."
-                            )
-                        },
-                        {"role": "user", "content": prompt}
-                    ],
-                    stream=True
-                )
-
-                st.session_state.chat_history.append(("user", user_input))
-                respuesta_stream = ""
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    for chunk in response:
-                        if chunk.choices[0].delta.content:
-                            respuesta_stream += chunk.choices[0].delta.content
-                            message_placeholder.markdown(respuesta_stream + "▌")
-                    message_placeholder.markdown(respuesta_stream)
-                st.session_state.chat_history.append(("bot", respuesta_stream))
-            except Exception as e:
-                answer = f"Error al generar respuesta: {e}"
-                st.session_state.chat_history.append(("user", user_input))
-                st.session_state.chat_history.append(("bot", answer))
-
-        for i in range(len(st.session_state.chat_history)-1, -1, -1):
-            role, msg = st.session_state.chat_history[i]
-            if role == "user":
-                st.chat_message("user").markdown(msg)
-            # No mostrar el mensaje assistant aquí si fue mostrado en streaming
-
-    with tab6:
         st.markdown("## ℹ️ Acerca del piloto de monitoreo de Ocupación PMZ")
         st.markdown("""
         Bienvenido a esta última pestaña, también conocida como el **diario íntimo del piloto**. Aquí no encontrarás KPIs ni barras de colores... al menos no todavía.
