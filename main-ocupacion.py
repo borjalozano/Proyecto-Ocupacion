@@ -38,23 +38,26 @@ if archivo:
         for i, row in resumen.iterrows():
             persona = row["Persona"]
             pmz = row["PMZ"]
-            st.markdown(f"**{persona}** — PMZ: {pmz}")
+            proyectos = filtro_mes[filtro_mes["Persona"] == persona]["Proyecto"].unique()
+            st.markdown(f"**{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
             st.markdown("---")
 
     with tab2:
+        # Leyenda de colores de semáforo
+        st.markdown("#### 🟢 PMZ ≥ 15 &nbsp;&nbsp;&nbsp; 🟡 5 ≤ PMZ < 15 &nbsp;&nbsp;&nbsp; 🔴 PMZ < 5")
         # Obtener los 3 próximos meses (mes actual + 2 siguientes)
-        meses_ordenados = meses_disponibles
+        meses_ordenados = sorted(meses_disponibles, key=lambda x: datetime.strptime(x, "%b").month)
         if mes_actual in meses_ordenados:
             idx = meses_ordenados.index(mes_actual)
         else:
             idx = 0
-        meses_3 = []
-        for i in range(3):
-            meses_3.append(meses_ordenados[(idx + i) % len(meses_ordenados)])
-        st.markdown(f"#### PMZ acumulada por persona para los próximos 3 meses: {', '.join(meses_3)}")
+        meses_3 = meses_ordenados[idx:idx+3]
+        st.markdown(f"#### Ocupación PMZ acumulada por persona para los próximos 3 meses: {', '.join(meses_3)}")
         filtro_3m = personas_df[personas_df["Mes"].isin(meses_3)]
         resumen_3m = filtro_3m.groupby("Persona").agg({"PMZ": "sum"}).reset_index()
+        detalle_ocupacion = filtro_3m.pivot_table(index="Persona", columns="Mes", values="PMZ", aggfunc="sum").fillna(0)
+        resumen_3m = resumen_3m.merge(detalle_ocupacion, on="Persona", how="left")
         # Semaforización
         def estado_pmz(total_pmz):
             if total_pmz < 5:
@@ -70,7 +73,8 @@ if archivo:
             persona = row["Persona"]
             pmz = row["PMZ"]
             estado = row["Estado"]
-            st.markdown(f"**{persona}** — PMZ total: {pmz} {estado}")
+            detalle = ', '.join([f"{mes}: {row[mes]}" for mes in meses_3 if mes in row])
+            st.markdown(f"**{persona}** — PMZ total: {pmz} {estado}  \n{detalle}")
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab2")
             st.markdown("---")
 else:
