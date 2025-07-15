@@ -93,7 +93,10 @@ if archivo:
             estado = "🔴" if pmz < 5 else "🟡" if pmz < 15 else "🟢"
             st.markdown(f"{estado} **{persona}** — PMZ: {pmz}  \nProyectos: {', '.join(proyectos)}")
             historial = st.session_state["comentarios"]
-            comentarios_previos = historial[historial["Persona"] == persona]
+            comentarios_previos = historial[
+                (historial["Persona"] == persona) & 
+                (historial["Pestaña"] == "Dashboard global")
+            ]
             comentario = st.text_input(f"✏️ Comentario / acción para {persona}", key=f"coment_{persona}_tab1")
             if comentario:
                 fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
