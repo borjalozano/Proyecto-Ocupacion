@@ -197,19 +197,16 @@ if archivo:
         alto = (pmz_total_validas >= 15).sum()
         promedio = pmz_total.mean()
 
-        st.metric("👥 Personas totales", total_personas)
-        st.metric("📉 Personas con Ocupación PMZ < 5", bajo)
-        st.metric("⚠️ Ocupación PMZ entre 5 y 15", medio)
-        st.metric("🟢 Ocupación PMZ ≥ 15", alto)
-        st.metric("📊 Promedio Ocupación PMZ por persona", round(promedio, 1))
-        st.metric("🚫 Personas sin Ocupación PMZ", len(sin_ocupacion))
+        col1, col2, col3 = st.columns(3)
+        col1.metric("👥 Personas totales", total_personas)
+        col1.metric("📉 PMZ < 5", bajo)
+        col1.metric("⚠️ PMZ 5–15", medio)
+        col2.metric("🟢 PMZ ≥ 15", alto)
+        col2.metric("📊 PMZ promedio", round(promedio, 1))
+        col3.metric("🚫 Sin PMZ", len(sin_ocupacion))
 
-        if not sin_ocupacion.empty:
-            st.markdown("#### 🧾 Personas sin Ocupación PMZ")
-            st.dataframe(sin_ocupacion.reset_index())
-
-        st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
         import plotly.express as px
+        st.markdown(f"### 📊 Distribución Ocupación PMZ por persona en {mes_indicador}")
         chart_data = pmz_total.sort_values(ascending=True).reset_index()
         fig = px.bar(
             chart_data,
@@ -221,6 +218,11 @@ if archivo:
             height=1000
         )
         st.plotly_chart(fig, use_container_width=True)
+
+        if not sin_ocupacion.empty:
+            st.markdown("#### 🧾 Personas sin Ocupación PMZ")
+            st.dataframe(sin_ocupacion.reset_index())
+
 else:
     st.info("Por favor sube un archivo para comenzar.")
 
