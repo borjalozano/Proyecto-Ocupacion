@@ -79,8 +79,8 @@ if archivo:
         "📊 Forecast a 3 meses",
         "🚫 Personas excluidas",
         "📈 Indicadores",
-        "ℹ️ Acerca del piloto",
-        "💬 Chatbot de PMZ"
+        "💬 Chatbot de PMZ",
+        "ℹ️ Acerca del piloto"
     ])
 
     with tab1:
@@ -278,7 +278,14 @@ if archivo:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "Eres un asistente útil que responde con base en datos de ocupación PMZ y comentarios."},
+                        {
+                            "role": "system",
+                            "content": (
+                                "Eres un asistente experto en gestión de personas basado en datos de ocupación PMZ y comentarios históricos. "
+                                "Tu tarea es identificar riesgos de subutilización, destacar personas con PMZ baja (<5), proponer acciones concretas para cada caso y redactar resúmenes semanales claros. "
+                                "Puedes usar emojis y listas para organizar tus respuestas."
+                            )
+                        },
                         {"role": "user", "content": prompt}
                     ]
                 )
