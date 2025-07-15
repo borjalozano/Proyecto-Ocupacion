@@ -8,12 +8,12 @@ st.image("Logo Babel Horizontal (1).jpg", width=180)
 st.title("Gestor Semanal de Ocupación - Babel")
 
 st.sidebar.markdown("## 📥 Subir archivo de Power BI")
+
+
+archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
 st.sidebar.markdown("### 🟢 PMZ ≥ 15")
 st.sidebar.markdown("### 🟡 5 ≤ PMZ < 15")
 st.sidebar.markdown("### 🔴 PMZ < 5")
-
-archivo = st.sidebar.file_uploader("Cargar archivo Excel exportado desde Power BI (formato resumido)", type=["xlsx"])
-
 if archivo:
     df = pd.read_excel(archivo, sheet_name=0, header=None)
     st.success("Archivo cargado correctamente.")
