@@ -63,7 +63,7 @@ if archivo:
     excluidos_df = raw_df[raw_df["Persona"].isin(st.session_state["personas_excluidas"])].copy()
 
     # Obtener meses disponibles y preparar para ambos tabs
-    meses_disponibles = sorted(personas_df["Mes"].dropna().unique().tolist())
+    meses_disponibles = sorted(personas_df["Mes"].dropna().unique().tolist(), key=lambda x: datetime.strptime(x, "%b").month)
     mes_actual = datetime.now().strftime("%b")  # Ej: "Jul"
     mes_default = mes_actual if mes_actual in meses_disponibles else meses_disponibles[0]
 
