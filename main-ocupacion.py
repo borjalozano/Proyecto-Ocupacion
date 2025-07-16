@@ -178,8 +178,6 @@ if archivo:
         if excluidos_df.empty:
             st.info("No se detectaron personas excluidas.")
         else:
-            total_pmz_excluidas = excluidos_df["PMZ"].sum()
-            st.metric("📊 Jornadas PMZ totales excluidas", round(total_pmz_excluidas, 1))
             excluidos_resumen = excluidos_df[["Persona", "Proyecto", "Mes", "PMZ"]].drop_duplicates()
             personas_reincorporadas = []
 
