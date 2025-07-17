@@ -52,9 +52,15 @@ if archivo:
     else:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
 
-    raw_df = df[df[0].astype(str).str.contains(r"\d{4} \|", regex=True, na=False)].copy()
-    raw_df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
-    raw_df["Persona"] = raw_df["ID_Nombre"].str.extract(r"\| (.+)")
+    raw_df = df.rename(columns={
+        "DimPersona[NombreCompuesto]": "Persona",
+        "DimProyecto[NombreCompuestoProyecto]": "Proyecto",
+        "DimCalendario[NombreMesCortoING]": "Mes",
+        "[valJourneysPrevisto]": "PMZ",
+        "[valJourneysReal]": "PMZ Real",
+        "[medDisponibilidad]": "Available",
+        "[v_2medCargabilidad]": "Occupation (%)"
+    }).copy()
 
     # Inicializar estado de exclusión manual
     if "personas_excluidas" not in st.session_state:
