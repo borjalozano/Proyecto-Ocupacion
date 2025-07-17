@@ -243,7 +243,7 @@ if archivo:
 
         col_a, col_b, col_c = st.columns(3)
         col_a.metric("👥 Personas totales", total_personas)
-        col_b.metric("📊 Jornadas PMZ totales", round(pmz_total_suma, 1))
+        #col_b.metric("📊 Jornadas PMZ totales", round(pmz_total_suma, 1))
         col_c.metric("🚫 Sin Ocupación PMZ", len(sin_ocupacion))
         col_c.metric("📈 Ocupación PMZ promedio", round(promedio, 1))
 
