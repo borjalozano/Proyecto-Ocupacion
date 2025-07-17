@@ -38,18 +38,8 @@ st.sidebar.markdown("### 🟡 5 ≤ Ocupación PMZ < 15")
 st.sidebar.markdown("### 🔴 Ocupación PMZ < 5")
 if archivo:
     if "personas_df" not in st.session_state:
-        st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=None)
+        st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=0)
     df = st.session_state["raw_df"]
-    df.columns = [
-        "DimPersona[NombreCompuesto]",
-        "DimProyecto[NombreCompuestoProyecto]",
-        "DimCalendario[NombreMesCortoING]",
-        "DimCalendario[Mes]",
-        "[valJourneysPrevisto]",
-        "[valJourneysReal]",
-        "[medDisponibilidad]",
-        "[v_2medCargabilidad]"
-    ]
     st.success("Archivo cargado correctamente.")
 
     if archivo_comentarios is not None:
