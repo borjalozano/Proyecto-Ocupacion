@@ -67,9 +67,8 @@ if archivo:
         # Aplicar lógica de exclusión automática inicial
         pmz_total = raw_df.groupby("Persona")["PMZ"].sum()
         sin_pmz = pmz_total[pmz_total == 0].index.tolist()
-        enfermedad = raw_df["Proyecto"].str.upper().str.contains("ENFERMEDAD", na=False)
-        desocupacion = raw_df["Proyecto"].str.upper().str.contains("DESOCUPACIÓN", na=False)
-        excluidas = raw_df[raw_df["Persona"].isin(sin_pmz) & ~enfermedad & ~desocupacion]["Persona"].unique().tolist()
+        proyecto_exclusiones = raw_df["Proyecto"].str.upper().str.contains("ENFERMEDAD|DESOCUPACIÓN|DESASIGN", na=False)
+        excluidas = raw_df[raw_df["Persona"].isin(sin_pmz) & ~proyecto_exclusiones]["Persona"].unique().tolist()
         st.session_state["personas_excluidas"] = excluidas
 
     # Construir personas_df y excluidos_df en base al estado
