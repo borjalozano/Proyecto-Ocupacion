@@ -87,6 +87,9 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
+# Eliminar cualquier línea obsoleta de renombrado manual de columnas
+# (Por ejemplo: raw_df.columns = [...]) -- NINGUNA debe quedar aquí.
+
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📥 Revisión semanal",
         "📊 Forecast a 3 meses",
