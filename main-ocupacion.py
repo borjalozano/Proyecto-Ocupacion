@@ -40,6 +40,16 @@ if archivo:
     if "personas_df" not in st.session_state:
         st.session_state["raw_df"] = pd.read_excel(archivo, sheet_name=0, header=None)
     df = st.session_state["raw_df"]
+    df.columns = [
+        "DimPersona[NombreCompuesto]",
+        "DimProyecto[NombreCompuestoProyecto]",
+        "DimCalendario[NombreMesCortoING]",
+        "DimCalendario[Mes]",
+        "[valJourneysPrevisto]",
+        "[valJourneysReal]",
+        "[medDisponibilidad]",
+        "[v_2medCargabilidad]"
+    ]
     st.success("Archivo cargado correctamente.")
 
     if archivo_comentarios is not None:
@@ -52,16 +62,6 @@ if archivo:
     else:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
 
-    df.columns = [
-        "DimPersona[NombreCompuesto]",
-        "DimProyecto[NombreCompuestoProyecto]",
-        "DimCalendario[NombreMesCortoING]",
-        "DimCalendario[Mes]",
-        "[valJourneysPrevisto]",
-        "[valJourneysReal]",
-        "[medDisponibilidad]",
-        "[v_2medCargabilidad]"
-    ]
 
     raw_df = df.rename(columns={
         "DimPersona[NombreCompuesto]": "Persona",
