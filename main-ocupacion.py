@@ -61,7 +61,6 @@ if archivo:
         "[medDisponibilidad]": "Available",
         "[v_2medCargabilidad]": "Occupation (%)"
     }).copy()
-
     # Inicializar estado de exclusión manual
     if "personas_excluidas" not in st.session_state:
         # Aplicar lógica de exclusión automática inicial
