@@ -52,6 +52,17 @@ if archivo:
     else:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
 
+    df.columns = [
+        "DimPersona[NombreCompuesto]",
+        "DimProyecto[NombreCompuestoProyecto]",
+        "DimCalendario[NombreMesCortoING]",
+        "DimCalendario[Mes]",
+        "[valJourneysPrevisto]",
+        "[valJourneysReal]",
+        "[medDisponibilidad]",
+        "[v_2medCargabilidad]"
+    ]
+
     raw_df = df.rename(columns={
         "DimPersona[NombreCompuesto]": "Persona",
         "DimProyecto[NombreCompuestoProyecto]": "Proyecto",
@@ -87,8 +98,6 @@ if archivo:
         idx = 0
     meses_3 = meses_ordenados[idx:idx+3]
 
-# Eliminar cualquier línea obsoleta de renombrado manual de columnas
-# (Por ejemplo: raw_df.columns = [...]) -- NINGUNA debe quedar aquí.
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📥 Revisión semanal",
