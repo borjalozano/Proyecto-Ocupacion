@@ -51,7 +51,7 @@ if archivo:
         columnas_esperadas = ["Fecha", "Persona", "Mes", "Pestaña", "Comentario"]
         df_comentarios = df_comentarios[[col for col in columnas_esperadas if col in df_comentarios.columns]].copy()
         df_comentarios["Comentario"] = df_comentarios["Comentario"].fillna("")
-        df_comentarios["Fecha"] = pd.to_datetime(df_comentarios["Fecha"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M:%S")
+        df_comentarios["Fecha"] = pd.to_datetime(df_comentarios["Fecha"], errors="coerce")
         st.session_state["comentarios"] = df_comentarios
     else:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
