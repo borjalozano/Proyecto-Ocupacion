@@ -47,7 +47,11 @@ if archivo:
             df_comentarios = pd.read_csv(archivo_comentarios)
         else:
             df_comentarios = pd.read_excel(archivo_comentarios)
+
+        columnas_esperadas = ["Fecha", "Persona", "Mes", "Pestaña", "Comentario"]
+        df_comentarios = df_comentarios[[col for col in columnas_esperadas if col in df_comentarios.columns]].copy()
         df_comentarios["Comentario"] = df_comentarios["Comentario"].fillna("")
+        df_comentarios["Fecha"] = pd.to_datetime(df_comentarios["Fecha"], errors="coerce").dt.strftime("%Y-%m-%d %H:%M:%S")
         st.session_state["comentarios"] = df_comentarios
     else:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
