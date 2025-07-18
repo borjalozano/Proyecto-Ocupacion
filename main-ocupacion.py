@@ -67,7 +67,6 @@ if archivo:
         "[v_2medCargabilidad]": "Occupation (%)"
     }).copy()
     raw_df["Persona"] = raw_df["Persona"].str.replace(r"^\s*\d+\s*\|\s*", "", regex=True).str.strip()
-    excluidos_df["Persona"] = excluidos_df["Persona"].str.replace(r"^\s*\d+\s*\|\s*", "", regex=True).str.strip()
     # Inicializar estado de exclusión manual
     if "personas_excluidas" not in st.session_state:
         # Aplicar lógica de exclusión automática inicial
@@ -82,6 +81,7 @@ if archivo:
     # Construir personas_df y excluidos_df en base al estado
     personas_df = raw_df[~raw_df["Persona"].isin(st.session_state["personas_excluidas"])].copy()
     excluidos_df = raw_df[raw_df["Persona"].isin(st.session_state["personas_excluidas"])].copy()
+    excluidos_df["Persona"] = excluidos_df["Persona"].str.replace(r"^\s*\d+\s*\|\s*", "", regex=True).str.strip()
 
     # Obtener meses disponibles y preparar para ambos tabs
     meses_validos = [m for m in personas_df["Mes"].dropna().unique() if isinstance(m, str) and len(m) == 3]
