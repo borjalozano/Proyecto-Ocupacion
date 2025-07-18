@@ -66,6 +66,7 @@ if archivo:
         "[medDisponibilidad]": "Available",
         "[v_2medCargabilidad]": "Occupation (%)"
     }).copy()
+    raw_df["Persona"] = raw_df["Persona"].str.replace(r"^\s*\d+\s*\|\s*", "", regex=True).str.strip()
     # Inicializar estado de exclusión manual
     if "personas_excluidas" not in st.session_state:
         # Aplicar lógica de exclusión automática inicial
