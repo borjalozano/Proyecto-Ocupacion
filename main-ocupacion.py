@@ -57,16 +57,9 @@ if archivo:
         st.session_state["comentarios"] = cargar_comentarios_desde_archivo(None)
 
 
-    raw_df = df.rename(columns={
-        "DimPersona[NombreCompuesto]": "Persona",
-        "DimProyecto[NombreCompuestoProyecto]": "Proyecto",
-        "DimCalendario[NombreMesCortoING]": "Mes",
-        "[valJourneysPrevisto]": "PMZ",
-        "[valJourneysReal]": "PMZ Real",
-        "[medDisponibilidad]": "Available",
-        "[v_2medCargabilidad]": "Occupation (%)"
-    }).copy()
-    raw_df["Persona"] = raw_df["Persona"].str.replace(r"^\s*\d+\s*\|\s*", "", regex=True).str.strip()
+    df.columns = ["ID_Nombre", "Proyecto", "Mes", "PMZ", "Occupation", "Available", "Occupation (%)"]
+    raw_df = df.copy()
+    raw_df["Persona"] = raw_df["ID_Nombre"].str.extract(r"\| (.+)")
     # Inicializar estado de exclusión manual
     if "personas_excluidas" not in st.session_state:
         # Aplicar lógica de exclusión automática inicial
